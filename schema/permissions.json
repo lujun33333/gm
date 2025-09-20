@@ -1,0 +1,46 @@
+{
+  "type": "Page",
+  "title": "权限管理",
+  "permission": "PERM_ADMIN",
+  "body": [
+    {
+      "type": "Matrix",
+      "id": "permMatrix",
+      "roles": "{{data.roles}}",
+      "perms": "{{data.perms}}"
+    },
+    {
+      "type": "Form",
+      "id": "uiScope",
+      "title": "UI 可见范围",
+      "fields": [
+        {
+          "type": "CheckboxGroup",
+          "label": "模块可见",
+          "name": "modules",
+          "options": [
+            "Dashboard",
+            "Player/Profile",
+            "Player/Inventory",
+            "Player/Cars",
+            "Player/Vip",
+            "Player/SignIn",
+            "SendItem",
+            "Items",
+            "Monitor",
+            "Permissions",
+            "Settings"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "Button",
+          "text": "保存",
+          "style": "primary",
+          "onClick": "saveUiScope"
+        }
+      ]
+    }
+  ]
+}

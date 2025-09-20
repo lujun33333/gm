@@ -1,0 +1,57 @@
+{
+  "type": "Page",
+  "title": "玩家背包",
+  "dataSource": "/api/player/{{params.id}}/inventory",
+  "body": [
+    {
+      "type": "Table",
+      "id": "invTable",
+      "columns": [
+        {
+          "title": "UIN",
+          "dataIndex": "uin"
+        },
+        {
+          "title": "玩家昵称",
+          "dataIndex": "nickname"
+        },
+        {
+          "title": "物品ID",
+          "dataIndex": "item_id"
+        },
+        {
+          "title": "物品名称",
+          "dataIndex": "item_name"
+        },
+        {
+          "title": "数量",
+          "dataIndex": "count"
+        },
+        {
+          "title": "天数",
+          "dataIndex": "days"
+        },
+        {
+          "title": "状态",
+          "dataIndex": "status"
+        },
+        {
+          "title": "获得时间",
+          "dataIndex": "got_at"
+        },
+        {
+          "title": "物品类型",
+          "dataIndex": "item_type"
+        }
+      ],
+      "actions": [
+        {
+          "type": "Button",
+          "text": "新增道具",
+          "permission": "ITEM_ADD",
+          "onClick": "openAddItemDialog"
+        }
+      ]
+    }
+  ]
+}

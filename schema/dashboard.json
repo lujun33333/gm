@@ -1,0 +1,94 @@
+{
+  "type": "Page",
+  "title": "仪表盘",
+  "body": [
+    {
+      "type": "Grid",
+      "cols": 12,
+      "gap": 4,
+      "children": [
+        {
+          "type": "Card",
+          "title": "在线玩家",
+          "span": {
+            "base": 12,
+            "md": 6
+          },
+          "children": [
+            {
+              "type": "Statistic",
+              "label": "当前在线",
+              "value": "{{data.online_total}}"
+            },
+            {
+              "type": "AreaChart",
+              "data": "{{data.online_series}}",
+              "x": "time",
+              "y": "count"
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "title": "系统状态",
+          "span": {
+            "base": 12,
+            "md": 6
+          },
+          "children": [
+            {
+              "type": "Gauge",
+              "label": "CPU",
+              "value": "{{data.cpu}}"
+            },
+            {
+              "type": "Gauge",
+              "label": "内存",
+              "value": "{{data.mem}}"
+            },
+            {
+              "type": "Text",
+              "value": "Uptime: {{data.uptime}}"
+            }
+          ]
+        },
+        {
+          "type": "Card",
+          "title": "网络监控",
+          "span": {
+            "base": 12
+          },
+          "children": [
+            {
+              "type": "LineChart",
+              "data": "{{data.net_series}}",
+              "x": "time",
+              "y": [
+                "in",
+                "out"
+              ]
+            },
+            {
+              "type": "Table",
+              "columns": [
+                {
+                  "title": "UIN",
+                  "dataIndex": "uin"
+                },
+                {
+                  "title": "昵称",
+                  "dataIndex": "nickname"
+                },
+                {
+                  "title": "带宽(bps)",
+                  "dataIndex": "bps"
+                }
+              ],
+              "data": "{{data.player_top_bandwidth}}"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

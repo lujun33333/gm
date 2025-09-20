@@ -1,0 +1,64 @@
+{
+  "type": "Page",
+  "title": "发放道具",
+  "permission": "ITEM_SEND",
+  "body": [
+    {
+      "type": "Form",
+      "id": "sendForm",
+      "fields": [
+        {
+          "type": "PlayerSelector",
+          "label": "玩家",
+          "name": "uin",
+          "required": true
+        },
+        {
+          "type": "ItemSelector",
+          "label": "道具",
+          "name": "item_id",
+          "required": true
+        },
+        {
+          "type": "NumberInput",
+          "label": "数量",
+          "name": "count",
+          "min": 1,
+          "max": 999,
+          "required": true
+        },
+        {
+          "type": "NumberInput",
+          "label": "天数",
+          "name": "days",
+          "min": 0,
+          "max": 365
+        },
+        {
+          "type": "Switch",
+          "label": "绑定",
+          "name": "bound"
+        },
+        {
+          "type": "TextArea",
+          "label": "备注/邮件",
+          "name": "mail",
+          "maxLength": 200
+        }
+      ],
+      "actions": [
+        {
+          "type": "Button",
+          "text": "发送",
+          "style": "primary",
+          "permission": "ITEM_SEND",
+          "onClick": "confirmSubmit",
+          "confirm": {
+            "keyword": "CONFIRM",
+            "summaryFrom": "sendForm"
+          }
+        }
+      ]
+    }
+  ]
+}

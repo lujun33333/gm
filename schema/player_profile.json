@@ -1,0 +1,157 @@
+{
+  "type": "Page",
+  "title": "玩家资料",
+  "dataSource": "/api/player/{{params.id}}",
+  "body": [
+    {
+      "type": "Form",
+      "id": "profileForm",
+      "fields": [
+        {
+          "type": "Text",
+          "label": "UIN",
+          "name": "uin",
+          "readOnly": true
+        },
+        {
+          "type": "Input",
+          "label": "昵称",
+          "name": "nickname",
+          "required": true
+        },
+        {
+          "type": "Select",
+          "label": "性别",
+          "name": "gender",
+          "options": [
+            "男",
+            "女",
+            "未知"
+          ]
+        },
+        {
+          "type": "Input",
+          "label": "国家",
+          "name": "country"
+        },
+        {
+          "type": "NumberInput",
+          "label": "经验值",
+          "name": "exp",
+          "min": 0
+        },
+        {
+          "type": "NumberInput",
+          "label": "点卷",
+          "name": "cash_a",
+          "min": 0
+        },
+        {
+          "type": "NumberInput",
+          "label": "消费卷",
+          "name": "cash_b",
+          "min": 0
+        },
+        {
+          "type": "NumberInput",
+          "label": "荣誉点",
+          "name": "honor",
+          "min": 0
+        },
+        {
+          "type": "NumberInput",
+          "label": "魅力值",
+          "name": "charm",
+          "min": 0
+        },
+        {
+          "type": "NumberInput",
+          "label": "舞力值",
+          "name": "dance",
+          "min": 0
+        },
+        {
+          "type": "TextArea",
+          "label": "签名",
+          "name": "sign",
+          "maxLength": 60
+        },
+        {
+          "type": "Text",
+          "label": "注册时间",
+          "name": "created_at",
+          "readOnly": true
+        },
+        {
+          "type": "Text",
+          "label": "喇叭",
+          "name": "horn",
+          "readOnly": true
+        },
+        {
+          "type": "Text",
+          "label": "二级密码",
+          "name": "sec_pwd",
+          "readOnly": true,
+          "mask": true
+        },
+        {
+          "type": "Select",
+          "label": "二级密码状态",
+          "name": "sec_pwd_status",
+          "options": [
+            "启用",
+            "禁用"
+          ]
+        },
+        {
+          "type": "Select",
+          "label": "巅峰赛状态",
+          "name": "peak_status",
+          "options": [
+            "参与",
+            "禁赛"
+          ]
+        }
+      ],
+      "actions": [
+        {
+          "type": "Button",
+          "text": "保存",
+          "style": "primary",
+          "permission": "PLAYER_EDIT",
+          "onClick": "submit"
+        },
+        {
+          "type": "Button",
+          "text": "封禁",
+          "permission": "PLAYER_BAN",
+          "visibleWhen": "{{data.status === 0}}",
+          "onClick": "banPlayer",
+          "confirm": {
+            "keyword": "CONFIRM"
+          }
+        },
+        {
+          "type": "Button",
+          "text": "解封",
+          "permission": "PLAYER_BAN",
+          "visibleWhen": "{{data.status === 1}}",
+          "onClick": "unbanPlayer",
+          "confirm": {
+            "keyword": "CONFIRM"
+          }
+        },
+        {
+          "type": "Button",
+          "text": "重置二级密码",
+          "permission": "PLAYER_EDIT",
+          "onClick": "resetSecPwd",
+          "confirm": {
+            "keyword": "CONFIRM"
+          }
+        }
+      ]
+    }
+  ]
+}

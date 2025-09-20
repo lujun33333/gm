@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GM 工具桌面端</title>
+
+    <!-- 防闪屏脚本 - 必须在样式之前 -->
+    <script>
+      (function() {
+        try {
+          const stored = localStorage.getItem('gm-theme-settings');
+          const settings = stored ? JSON.parse(stored) : { mode: 'system' };
+
+          function applyTheme(theme) {
+            const html = document.documentElement;
+            html.className = html.className.replace(/theme-\w+/g, '');
+            html.classList.add(`theme-${theme}`);
+            html.setAttribute('data-theme', theme);
+          }
+
+          function getSystemTheme() {
+            return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          }
+
+          function getScheduledTheme() {
+            const now = new Date();
+            const hour = now.getHours();
+            const darkStart = settings.darkStart || 18;
+            const darkEnd = settings.darkEnd || 6;
+
+            if (darkStart > darkEnd) {
+              // 跨午夜，如 18:00 - 6:00
+              return (hour >= darkStart || hour < darkEnd) ? 'dark' : 'light';
+            } else {
+              // 同一天，如 6:00 - 18:00
+              return (hour >= darkStart && hour < darkEnd) ? 'dark' : 'light';
+            }
+          }
+
+          let targetTheme;
+          switch (settings.mode) {
+            case 'light':
+              targetTheme = 'light';
+              break;
+            case 'dark':
+              targetTheme = 'dark';
+              break;
+            case 'scheduled':
+              targetTheme = getScheduledTheme();
+              break;
+            default:
+              targetTheme = getSystemTheme();
+          }
+
+          applyTheme(targetTheme);
+        } catch (e) {
+          // 失败时默认浅色
+          document.documentElement.classList.add('theme-light');
+          document.documentElement.setAttribute('data-theme', 'light');
+        }
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
