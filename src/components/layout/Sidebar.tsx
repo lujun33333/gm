@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useNavigate, useLocation } from 'react-router-dom'
-import { GlowCard } from '@/components/common/GlowCard'
+import { GlowCard } from '@/components/fx/GlowCard'
 import { ThemeSwitch } from '@/components/common/ThemeSwitch'
 import { Permit } from '@/components/common/Permit'
 import { Button } from '@/components/ui/button'
@@ -88,7 +88,7 @@ export function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
                   key={child.key}
                   onClick={() => handleItemClick(child)}
                   className={clsx(
-                    "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors text-left",
+                    "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors text-left cursor-pointer",
                     isChildActive
                       ? "bg-primary text-white"
                       : "hover:bg-bg-secondary text-text-secondary"
@@ -131,7 +131,7 @@ export function Sidebar({ isOpen, onToggle, isMobile }: SidebarProps) {
         key={item.key}
         onClick={() => handleItemClick(item)}
         className={clsx(
-          "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors text-left",
+          "w-full flex items-center px-3 py-2 text-sm rounded-md transition-colors text-left cursor-pointer",
           isActive
             ? "bg-primary text-white"
             : "hover:bg-bg-secondary text-text-secondary"

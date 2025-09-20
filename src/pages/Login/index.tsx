@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { useNavigate } from 'react-router-dom'
-import { GlowCard } from '@/components/common/GlowCard'
+import { GlowCard } from '@/components/fx/GlowCard'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { useToast } from '@/hooks/useToast'
@@ -65,32 +65,34 @@ export function Login() {
             <p className="text-text-muted mt-2">管理员工具登录</p>
           </div>
 
-          <form onSubmit={handleLogin} className="space-y-4">
+          <form onSubmit={handleLogin} className="space-y-4 relative z-10">
             <div className="space-y-2">
-              <label className="text-sm font-medium">用户名</label>
+              <label className="text-sm font-medium text-text">用户名</label>
               <Input
                 type="text"
                 placeholder="请输入用户名"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
+                autoComplete="username"
               />
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">密码</label>
+              <label className="text-sm font-medium text-text">密码</label>
               <Input
                 type="password"
                 placeholder="请输入密码"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
+                autoComplete="current-password"
               />
             </div>
 
             <Button
               type="submit"
-              className="w-full"
+              className="w-full mt-6"
               disabled={loading}
               variant="shimmer"
             >

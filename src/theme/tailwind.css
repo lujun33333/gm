@@ -42,6 +42,8 @@
     mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     mask-composite: xor;
     -webkit-mask-composite: xor;
+    pointer-events: none;
+    z-index: -1;
   }
 
   /* 布局工具类 */
@@ -62,5 +64,39 @@
   .layout-full-width {
     width: 100vw;
     width: 100dvw; /* 动态视口宽度支持 */
+  }
+
+  /* 音乐播放器样式 */
+  .volume-slider::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: rgb(var(--primary));
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .volume-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    background: rgb(var(--primary));
+    border-radius: 50%;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .volume-slider::-webkit-slider-track {
+    height: 8px;
+    border-radius: 4px;
+    background: rgb(var(--bg-secondary));
+  }
+
+  .volume-slider::-moz-range-track {
+    height: 8px;
+    border-radius: 4px;
+    background: rgb(var(--bg-secondary));
+    border: none;
   }
 }

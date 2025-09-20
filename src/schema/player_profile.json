@@ -1,0 +1,61 @@
+{
+  "title": "玩家资料",
+  "description": "查看和编辑玩家基本信息",
+  "type": "form",
+  "permission": "PLAYER_VIEW",
+  "layout": {
+    "type": "grid",
+    "columns": 2,
+    "gap": 6
+  },
+  "fields": [
+    {
+      "name": "uin",
+      "label": "玩家UIN",
+      "type": "number",
+      "required": true,
+      "placeholder": "输入玩家UIN查询",
+      "span": 1,
+      "validation": {
+        "required": "UIN不能为空",
+        "min": 1000
+      }
+    },
+    {
+      "name": "nickname",
+      "label": "昵称",
+      "type": "text",
+      "readonly": true,
+      "span": 1
+    },
+    {
+      "name": "level",
+      "label": "等级",
+      "type": "number",
+      "readonly": true,
+      "span": 1
+    },
+    {
+      "name": "money",
+      "label": "金币",
+      "type": "number",
+      "permission": "PLAYER_EDIT",
+      "span": 1
+    }
+  ],
+  "actions": [
+    {
+      "name": "search",
+      "label": "查询玩家",
+      "type": "button",
+      "variant": "primary"
+    },
+    {
+      "name": "save",
+      "label": "保存修改",
+      "type": "submit",
+      "variant": "primary",
+      "permission": "PLAYER_EDIT"
+    }
+  ]
+}

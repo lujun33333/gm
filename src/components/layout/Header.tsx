@@ -11,7 +11,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { GlowCard } from "@/components/common/GlowCard"
+import { GlowCard } from '@/components/fx/GlowCard'
 import { useToast } from "@/hooks/useToast"
 
 export function Header() {

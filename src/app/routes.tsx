@@ -10,6 +10,7 @@ import { PlayerSignIn } from '../pages/Player/SignIn'
 import { Items } from '../pages/Items'
 import { SendItem } from '../pages/SendItem'
 import { Permissions } from '../pages/Permissions'
+import { SchemaPage } from '../pages/Schema'
 
 // 受保护的路由组件
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
@@ -115,6 +116,14 @@ export function Routes() {
         element={
           <ProtectedRoute>
             <Permissions />
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/s/:name"
+        element={
+          <ProtectedRoute>
+            <SchemaPage />
           </ProtectedRoute>
         }
       />

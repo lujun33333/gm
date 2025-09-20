@@ -2,6 +2,7 @@ import { ReactNode, useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Sidebar, SidebarToggle } from './Sidebar'
 import { Header } from './Header'
+import { MusicPlayer } from '../common/MusicPlayer'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
 
 interface AppShellProps {
@@ -71,6 +72,9 @@ export function AppShell({ children }: AppShellProps) {
           {children}
         </div>
       </motion.main>
+
+      {/* 音乐播放器 */}
+      <MusicPlayer />
     </div>
   )
 }

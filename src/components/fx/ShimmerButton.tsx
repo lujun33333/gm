@@ -66,7 +66,7 @@ export function ShimmerButton({
     >
       {/* 闪光动画层 */}
       <motion.div
-        className="absolute inset-0 -top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12"
+        className="absolute inset-0 -top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/30 to-transparent skew-x-12 pointer-events-none"
         animate={{
           left: isShimmering ? '100%' : '-100%',
         }}
@@ -78,7 +78,7 @@ export function ShimmerButton({
 
       {/* 周期性闪光（每3秒一次） */}
       <motion.div
-        className="absolute inset-0 -top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12"
+        className="absolute inset-0 -top-0 -left-full w-full h-full bg-gradient-to-r from-transparent via-white/20 to-transparent skew-x-12 pointer-events-none"
         animate={{
           left: ['−100%', '100%'],
         }}
@@ -104,7 +104,7 @@ export function ShimmerButton({
 
       {/* 悬停光晕效果 */}
       <motion.div
-        className="absolute inset-0 bg-white/10 rounded-lg"
+        className="absolute inset-0 bg-white/10 rounded-lg pointer-events-none"
         initial={{ opacity: 0 }}
         whileHover={{ opacity: 1 }}
         transition={{ duration: 0.2 }}

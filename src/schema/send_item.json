@@ -1,133 +1,66 @@
 {
-  "type": "Page",
-  "id": "send_item_page",
   "title": "发送道具",
+  "description": "向指定玩家发送游戏道具",
+  "type": "form",
   "permission": "ITEM_SEND",
-  "body": [
+  "layout": {
+    "type": "grid",
+    "columns": 2,
+    "gap": 6
+  },
+  "fields": [
     {
-      "type": "Card",
-      "id": "send_item_card",
-      "title": "道具发放",
-      "className": "mb-6",
-      "children": [
-        {
-          "type": "Form",
-          "id": "send_item_form",
-          "fields": [
-            {
-              "type": "Grid",
-              "cols": 2,
-              "gap": 4,
-              "children": [
-                {
-                  "type": "GridItem",
-                  "span": 1,
-                  "children": [
-                    {
-                      "type": "PlayerSelector",
-                      "name": "uin",
-                      "label": "目标玩家",
-                      "placeholder": "输入 UIN 或昵称",
-                      "required": true
-                    }
-                  ]
-                },
-                {
-                  "type": "GridItem",
-                  "span": 1,
-                  "children": [
-                    {
-                      "type": "ItemSelector",
-                      "name": "item_id",
-                      "label": "选择道具",
-                      "required": true
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "Grid",
-              "cols": 3,
-              "gap": 4,
-              "children": [
-                {
-                  "type": "GridItem",
-                  "span": 1,
-                  "children": [
-                    {
-                      "type": "NumberInput",
-                      "name": "count",
-                      "label": "数量",
-                      "min": 1,
-                      "max": 999999,
-                      "required": true
-                    }
-                  ]
-                },
-                {
-                  "type": "GridItem",
-                  "span": 1,
-                  "children": [
-                    {
-                      "type": "NumberInput",
-                      "name": "days",
-                      "label": "有效天数",
-                      "min": 0,
-                      "max": 999,
-                      "placeholder": "0为永久"
-                    }
-                  ]
-                },
-                {
-                  "type": "GridItem",
-                  "span": 1,
-                  "children": [
-                    {
-                      "type": "Switch",
-                      "name": "bound",
-                      "label": "绑定道具"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "TextArea",
-              "name": "mail",
-              "label": "邮件内容",
-              "placeholder": "发送给玩家的邮件内容（可选）",
-              "maxLength": 500
-            }
-          ],
-          "actions": [
-            {
-              "type": "Button",
-              "id": "submit_btn",
-              "text": "发送道具",
-              "style": "primary",
-              "onClick": "confirmSubmit",
-              "permission": "ITEM_SEND",
-              "confirm": {
-                "keyword": "CONFIRM"
-              }
-            }
-          ]
-        }
-      ]
+      "name": "player_selector",
+      "label": "选择玩家",
+      "type": "select",
+      "required": true,
+      "placeholder": "请选择目标玩家",
+      "span": 2,
+      "options": [
+        { "value": "1001", "label": "张三 (UIN: 1001)" },
+        { "value": "1002", "label": "李四 (UIN: 1002)" },
+        { "value": "1003", "label": "王五 (UIN: 1003)" }
+      ],
+      "validation": {
+        "required": "请选择目标玩家"
+      }
     },
     {
-      "type": "Card",
-      "id": "send_history_card",
-      "title": "最近发放记录",
-      "permission": "ITEM_SEND",
-      "children": [
-        {
-          "type": "Text",
-          "value": "这里将显示最近的道具发放记录",
-          "className": "text-text-muted text-center py-8"
-        }
-      ]
+      "name": "item_id",
+      "label": "道具ID",
+      "type": "number",
+      "required": true,
+      "placeholder": "输入道具ID",
+      "span": 1,
+      "validation": {
+        "required": "道具ID不能为空",
+        "min": 1,
+        "message": "道具ID必须大于0"
+      }
+    },
+    {
+      "name": "item_count",
+      "label": "数量",
+      "type": "number",
+      "required": true,
+      "placeholder": "输入数量",
+      "defaultValue": 1,
+      "span": 1,
+      "validation": {
+        "required": "数量不能为空",
+        "min": 1,
+        "max": 999,
+        "message": "数量范围: 1-999"
+      }
+    }
+  ],
+  "actions": [
+    {
+      "name": "submit",
+      "label": "发送道具",
+      "type": "submit",
+      "variant": "primary",
+      "permission": "ITEM_SEND"
     }
   ]
 }

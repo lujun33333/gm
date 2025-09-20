@@ -11,6 +11,7 @@ import { Statistic, StatisticCard } from '../../components/data/Statistic'
 import { Gauge, MiniGauge } from '../../components/data/Gauge'
 import { TrendChart, MultiTrendChart, MiniTrendChart } from '../../components/charts/TrendChart'
 import { useToast } from '../../hooks/useToast'
+import { usePerm } from '../../hooks/usePerm'
 import { api } from '../../utils/api'
 import type { DashboardData } from '../../utils/mock'
 
@@ -19,6 +20,7 @@ export function Dashboard() {
   const [loading, setLoading] = useState(true)
   const { openDialog, ConfirmDialog } = useConfirmDialog()
   const { toast } = useToast()
+  const { userInfo, userPermissions, isOwner, isSub } = usePerm()
 
   useEffect(() => {
     loadDashboardData()
@@ -387,7 +389,7 @@ export function Dashboard() {
                 <Permit perm="SERVER_CONTROL">
                   <button
                     onClick={handleDangerousAction}
-                    className="w-full h-10 text-sm bg-gradient-to-r from-error to-warning text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
+                    className="w-full h-10 text-sm bg-gradient-to-r from-error to-warning text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium cursor-pointer hover:scale-105 active:scale-95"
                   >
                     🔄 重启服务器
                   </button>
@@ -532,6 +534,109 @@ export function Dashboard() {
             </div>
           </GlowCard>
         </motion.div>
+
+        {/* 权限演示区域 - 仅管理员可见 */}
+        <Permit perm={['*', 'PERM_ADMIN']}>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.0 }}
+          >
+            <GlowCard glowColor="warning" className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <GradientText className="text-xl font-bold">
+                  🔐 权限管理演示
+                </GradientText>
+                <div className="text-sm text-text-muted">
+                  当前权限: {userPermissions.join(', ')}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                {/* 用户信息 */}
+                <div className="p-4 bg-bg-secondary/50 rounded-lg">
+                  <h4 className="font-semibold text-text mb-3">用户信息</h4>
+                  <div className="space-y-2 text-sm">
+                    <div>用户名: {userInfo?.username}</div>
+                    <div>角色: {userInfo?.role}</div>
+                    <div className={`px-2 py-1 rounded text-xs ${
+                      isOwner ? 'bg-error/20 text-error' :
+                      isSub ? 'bg-warning/20 text-warning' :
+                      'bg-success/20 text-success'
+                    }`}>
+                      {isOwner ? '超级管理员' : isSub ? '子管理员' : '普通用户'}
+                    </div>
+                  </div>
+                </div>
+
+                {/* 权限测试按钮 */}
+                <div className="p-4 bg-bg-secondary/50 rounded-lg">
+                  <h4 className="font-semibold text-text mb-3">权限测试</h4>
+                  <div className="space-y-2">
+                    <Permit perm="SERVER_CONTROL">
+                      <button className="w-full text-sm bg-error/20 text-error p-2 rounded hover:bg-error/30 transition-colors cursor-pointer">
+                        服务器控制权限 ✓
+                      </button>
+                    </Permit>
+
+                    <Permit perm="PLAYER_BAN">
+                      <button className="w-full text-sm bg-warning/20 text-warning p-2 rounded hover:bg-warning/30 transition-colors cursor-pointer">
+                        封禁玩家权限 ✓
+                      </button>
+                    </Permit>
+
+                    <Permit perm="ITEM_ADD">
+                      <button className="w-full text-sm bg-success/20 text-success p-2 rounded hover:bg-success/30 transition-colors cursor-pointer">
+                        添加道具权限 ✓
+                      </button>
+                    </Permit>
+                  </div>
+                </div>
+
+                {/* 危险操作演示 */}
+                <div className="p-4 bg-bg-secondary/50 rounded-lg">
+                  <h4 className="font-semibold text-text mb-3">危险操作</h4>
+                  <div className="space-y-2">
+                    <Permit perm="*">
+                      <button
+                        onClick={() => openDialog({
+                          title: '超级危险操作',
+                          content: (
+                            <div>
+                              <p className="text-error mb-3">
+                                此操作将清空所有数据！
+                              </p>
+                              <div className="p-3 bg-error/10 border border-error/20 rounded">
+                                <p className="text-sm text-error">
+                                  ⚠️ 需要输入 CONFIRM 确认
+                                </p>
+                              </div>
+                            </div>
+                          ),
+                          requireKeyword: 'CONFIRM',
+                          variant: 'error',
+                          onConfirm: async () => {
+                            toast({
+                              title: '操作已确认',
+                              description: '演示：危险操作已执行'
+                            })
+                          }
+                        })}
+                        className="w-full text-sm bg-error text-white p-2 rounded hover:bg-error/90 transition-colors cursor-pointer"
+                      >
+                        清空数据库 (需CONFIRM)
+                      </button>
+                    </Permit>
+
+                    <button className="w-full text-sm bg-bg-tertiary text-text-muted p-2 rounded cursor-not-allowed">
+                      无权限操作 (隐藏)
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </GlowCard>
+          </motion.div>
+        </Permit>
       </div>
 
       {/* ConfirmDialog 组件 */}
