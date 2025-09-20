@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="资源文件">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Log">
+      <UniqueIdentifier>{b192dd19-3fd3-4f5b-b8f6-82f11c5048d5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="GameServer">
+      <UniqueIdentifier>{19856c08-ee2a-4f20-8da9-f421aeaaa50b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Interface">
+      <UniqueIdentifier>{0f315d94-f25e-4358-872e-09f6d2b1e1ec}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Message">
+      <UniqueIdentifier>{d6c56b90-0d14-4801-bb91-4c84ffd19b11}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="DataBase">
+      <UniqueIdentifier>{1599962b-72c2-449b-8e9a-938f1f372f7e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Tea">
+      <UniqueIdentifier>{9a7e2cd1-d4ca-4495-9bfe-5786fd4d81f5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="log.cpp">
+      <Filter>Log</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="interface.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectoryServer.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectionPool.cpp">
+      <Filter>DataBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Dance.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Outdoor.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
+      <Filter>DataBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="DBConnection.cpp">
+      <Filter>DataBase</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Message</Filter>
+    </ClCompile>
+    <ClCompile Include="pet.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="oicq\tea.c">
+      <Filter>Tea</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageQuickRPC.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="Task.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowChallenge.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopServer.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="UserServer.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+    <ClCompile Include="md5file.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="fMD5.cpp">
+      <Filter>Interface</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadConfig.cpp">
+      <Filter>GameServer</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="log.h">
+      <Filter>Log</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="interface.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>Message</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionPool.h">
+      <Filter>DataBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="Dance.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="Outdoor.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="Database.h">
+      <Filter>DataBase</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="ini.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="MD5.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="ConmData.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="md5file.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="pet.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="oicq\tea.h">
+      <Filter>Tea</Filter>
+    </ClInclude>
+    <ClInclude Include="fMD5.h">
+      <Filter>Interface</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadConfig.h">
+      <Filter>GameServer</Filter>
+    </ClInclude>
+    <ClInclude Include="DBConnection.h">
+      <Filter>DataBase</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

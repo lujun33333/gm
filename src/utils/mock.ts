@@ -234,6 +234,10 @@ class MockAPI {
       return this.handleServerRestart(body)
     }
 
+    if (endpoint.startsWith('/music/')) {
+      return this.handleMusic(endpoint, method, body)
+    }
+
     // 默认响应
     return {
       code: 0,
@@ -619,6 +623,103 @@ class MockAPI {
     }
   }
 
+  private handleMusic(endpoint: string, method: string, body?: any): ApiResponse {
+    // 音乐搜索
+    if (endpoint.includes('/search')) {
+      const { keyword, limit = 20, platform } = body || {}
+      if (!keyword) {
+        return { code: 1, msg: '搜索关键词不能为空' }
+      }
+
+      return {
+        code: 0,
+        data: {
+          songs: this.generateMockSearchResults(keyword, platform, limit)
+        }
+      }
+    }
+
+    // 获取播放URL
+    if (endpoint.includes('/url')) {
+      const { songId, platform, quality } = body || {}
+      if (!songId) {
+        return { code: 1, msg: '歌曲ID不能为空' }
+      }
+
+      // 模拟不同平台的播放URL
+      const baseUrls = {
+        netease: 'https://music.163.com/song/media/outer/url',
+        qq: 'https://stream.qqmusic.qq.com',
+        local: '/audio'
+      }
+
+      const baseUrl = baseUrls[platform as keyof typeof baseUrls] || baseUrls.local
+      const mockUrl = `${baseUrl}/${songId}.mp3?quality=${quality}`
+
+      return {
+        code: 0,
+        data: {
+          url: mockUrl
+        }
+      }
+    }
+
+    // 获取歌词
+    if (endpoint.includes('/lyric')) {
+      const { songId, platform } = body || {}
+      if (!songId) {
+        return { code: 1, msg: '歌曲ID不能为空' }
+      }
+
+      return {
+        code: 0,
+        data: {
+          lyric: this.generateMockLyric(songId)
+        }
+      }
+    }
+
+    // 获取推荐
+    if (endpoint.includes('/recommend')) {
+      const { limit = 10, platform } = body || {}
+
+      return {
+        code: 0,
+        data: {
+          songs: this.generateMockRecommendations(platform, limit)
+        }
+      }
+    }
+
+    // 验证API密钥
+    if (endpoint.includes('/validate')) {
+      const { platform, apiKey } = body || {}
+
+      if (platform === 'local') {
+        return { code: 0, msg: '本地音乐无需验证' }
+      }
+
+      if (!apiKey) {
+        return { code: 1, msg: 'API密钥不能为空' }
+      }
+
+      // 模拟验证逻辑
+      const validKeys = {
+        netease: ['test_netease_key_123456', 'demo_key_abcdef'],
+        qq: ['test_qq_key_789012', 'demo_qq_key_ghijkl']
+      }
+
+      const platformKeys = validKeys[platform as keyof typeof validKeys]
+      if (platformKeys && platformKeys.includes(apiKey)) {
+        return { code: 0, msg: 'API密钥验证成功' }
+      }
+
+      return { code: 1, msg: 'API密钥验证失败' }
+    }
+
+    return { code: 0, msg: '音乐操作成功' }
+  }
+
   // Mock数据生成方法
   private generateMockPlayer(uin: string): Player {
     return {
@@ -872,6 +973,77 @@ class MockAPI {
         updated_at: '2024-02-01 00:00:00'
       }
     ]
+  }
+
+  private generateMockSearchResults(keyword: string, platform: string, limit: number): any[] {
+    const artists = ['周杰伦', '邓紫棋', '林俊杰', '张学友', '王菲', '陈奕迅', '李荣浩', '毛不易', '薛之谦', '汪苏泷']
+    const albumPrefixes = ['专辑', '新歌', '精选', '合集', '最新']
+    const songs = []
+
+    const platformNames = {
+      netease: '网易云音乐',
+      qq: 'QQ音乐',
+      local: '本地音乐'
+    }
+
+    for (let i = 1; i <= Math.min(limit, 20); i++) {
+      const artist = artists[Math.floor(Math.random() * artists.length)]
+      const albumPrefix = albumPrefixes[Math.floor(Math.random() * albumPrefixes.length)]
+
+      songs.push({
+        id: `${platform}_${keyword}_${i}`,
+        name: `${keyword}相关歌曲${i}`,
+        artist: artist,
+        album: `${albumPrefix}·${artist}`,
+        duration: 180 + Math.floor(Math.random() * 120), // 3-5分钟
+        cover: `https://via.placeholder.com/300x300/${this.getRandomColor()}/FFFFFF?text=${encodeURIComponent(keyword + i)}`,
+        platform: platform
+      })
+    }
+
+    return songs
+  }
+
+  private generateMockRecommendations(platform: string, limit: number): any[] {
+    const recommendations = [
+      { name: '今日推荐', artist: '推荐歌手1', album: '热门榜单' },
+      { name: '热门金曲', artist: '流行歌手', album: '经典合集' },
+      { name: '网络热歌', artist: '网络歌手', album: '网络音乐' },
+      { name: '抒情慢歌', artist: '情歌王子', album: '抒情专辑' },
+      { name: '动感节拍', artist: 'DJ大师', album: '电音合集' },
+      { name: '古风雅韵', artist: '古风歌手', album: '古风专辑' },
+      { name: '摇滚经典', artist: '摇滚乐队', album: '摇滚精选' },
+      { name: '民谣时光', artist: '民谣歌手', album: '民谣集' },
+      { name: '说唱新声', artist: '说唱歌手', album: 'Hip-Hop' },
+      { name: '轻音乐', artist: '轻音乐团', album: '纯音乐' }
+    ]
+
+    return recommendations.slice(0, limit).map((rec, index) => ({
+      id: `${platform}_rec_${index + 1}`,
+      name: rec.name,
+      artist: rec.artist,
+      album: rec.album,
+      duration: 200 + Math.floor(Math.random() * 100),
+      cover: `https://via.placeholder.com/300x300/${this.getRandomColor()}/FFFFFF?text=${encodeURIComponent(rec.name)}`,
+      platform: platform
+    }))
+  }
+
+  private generateMockLyric(songId: string): string {
+    const lyrics = [
+      '[00:00.00]这是一首美妙的歌曲\n[00:05.00]让我们一起聆听\n[00:10.00]音乐的力量无穷\n[00:15.00]带来心灵的慰藉',
+      '[00:00.00]歌词同步显示功能\n[00:04.00]让音乐更有感染力\n[00:08.00]每一个音符都有意义\n[00:12.00]每一句歌词都有故事',
+      '[00:00.00]在这个美好的时光里\n[00:06.00]音乐伴随着我们\n[00:12.00]创造美好的回忆\n[00:18.00]让生活充满色彩'
+    ]
+
+    // 根据songId选择不同的歌词
+    const index = songId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0) % lyrics.length
+    return lyrics[index]
+  }
+
+  private getRandomColor(): string {
+    const colors = ['FF6B6B', '4ECDC4', '45B7D1', '96CEB4', 'FECA57', 'FF9FF3', 'A8E6CF', 'FFD93D', 'C7CEEA', 'FF8B94']
+    return colors[Math.floor(Math.random() * colors.length)]
   }
 }
 

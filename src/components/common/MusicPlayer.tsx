@@ -1,53 +1,127 @@
-import { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { Search, Settings, SkipBack, SkipForward, Play, Pause, Volume2, VolumeX, Heart, Plus, X } from 'lucide-react'
 import { useLocalStorage } from '@/hooks/useLocalStorage'
+import { useMusicSettings } from '@/hooks/useMusicSettings'
+import { musicApi, audioManager, type SearchResult } from '@/utils/musicApi'
+import { MusicSettings } from './MusicSettings'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
 
 interface MusicPlayerProps {
   className?: string
 }
 
+interface CurrentTrack {
+  id: string
+  name: string
+  artist: string
+  album?: string
+  duration: number
+  url?: string
+  cover?: string
+  platform: 'netease' | 'qq' | 'local'
+}
+
 export function MusicPlayer({ className = '' }: MusicPlayerProps) {
+  const {
+    settings,
+    playlist,
+    favorites,
+    addToPlaylist,
+    removeFromPlaylist,
+    addToFavorites,
+    removeFromFavorites,
+    isFavorite
+  } = useMusicSettings()
+
   const [isPlaying, setIsPlaying] = useState(false)
   const [currentTime, setCurrentTime] = useState(0)
   const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useLocalStorage('gm-music-volume', 0.3)
+  const [volume, setVolume] = useLocalStorage('gm-music-volume', settings.volume)
   const [isMuted, setIsMuted] = useState(false)
   const [isExpanded, setIsExpanded] = useState(false)
-  const [currentTrack, setCurrentTrack] = useState(0)
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0)
+  const [currentTrack, setCurrentTrack] = useState<CurrentTrack | null>(null)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showSearch, setShowSearch] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
+  const [isSearching, setIsSearching] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   const audioRef = useRef<HTMLAudioElement>(null)
+  const searchTimeoutRef = useRef<NodeJS.Timeout>()
 
-  // 音乐播放列表 - 使用免费的背景音乐
-  const tracks = [
-    {
-      name: '宁静夜晚',
-      artist: '环境音乐',
-      duration: 180, // 3分钟
-      url: '' // 实际项目中应该放置音频文件URL
-    },
-    {
-      name: '专注工作',
-      artist: '轻音乐',
-      duration: 240, // 4分钟
-      url: ''
-    },
-    {
-      name: '放松心情',
-      artist: '纯音乐',
-      duration: 200, // 3分20秒
-      url: ''
+  // 初始化音乐API设置
+  useEffect(() => {
+    musicApi.setSettings(settings)
+  }, [settings])
+
+  // 加载当前播放轨道
+  useEffect(() => {
+    if (playlist.length > 0 && currentTrackIndex < playlist.length) {
+      const track = playlist[currentTrackIndex]
+      setCurrentTrack({
+        id: track.id,
+        name: track.name,
+        artist: track.artist,
+        album: track.album,
+        duration: track.duration,
+        url: track.url,
+        cover: track.cover,
+        platform: track.platform
+      })
+    } else {
+      setCurrentTrack(null)
     }
-  ]
+  }, [playlist, currentTrackIndex])
 
-  // 模拟音频播放 (实际项目中会使用真实音频)
+  // 真实音频播放逻辑
+  const loadAndPlayTrack = useCallback(async (track: CurrentTrack) => {
+    if (!track) return
+
+    setIsLoading(true)
+    setError(null)
+
+    try {
+      // 获取播放URL
+      let playUrl = track.url
+      if (!playUrl) {
+        playUrl = await musicApi.getPlayUrl(track.id, settings.quality)
+      }
+
+      if (!playUrl) {
+        throw new Error('无法获取播放链接')
+      }
+
+      // 使用Web Audio API播放
+      const audioInfo = await audioManager.loadAndPlay(playUrl, volume)
+      setDuration(audioInfo.duration)
+      setCurrentTime(0)
+      setIsPlaying(true)
+
+      // 更新轨道URL
+      setCurrentTrack(prev => prev ? { ...prev, url: playUrl } : null)
+    } catch (error) {
+      console.error('播放失败:', error)
+      setError(error instanceof Error ? error.message : '播放失败')
+      setIsPlaying(false)
+    } finally {
+      setIsLoading(false)
+    }
+  }, [settings.quality, volume])
+
+  // 播放时间更新
   useEffect(() => {
     let interval: NodeJS.Timeout
 
-    if (isPlaying) {
+    if (isPlaying && currentTrack) {
       interval = setInterval(() => {
         setCurrentTime(prev => {
           const newTime = prev + 1
-          if (newTime >= tracks[currentTrack].duration) {
+          if (newTime >= duration) {
             // 自动切换下一首
             handleNext()
             return 0
@@ -62,28 +136,88 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
         clearInterval(interval)
       }
     }
-  }, [isPlaying, currentTrack])
+  }, [isPlaying, currentTrack, duration])
 
   // 音量控制
   useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : volume
-    }
+    audioManager.setVolume(isMuted ? 0 : volume)
   }, [volume, isMuted])
 
-  const togglePlay = () => {
-    setIsPlaying(!isPlaying)
+  // 搜索音乐
+  const handleSearch = useCallback(async (query: string) => {
+    if (!query.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setIsSearching(true)
+    try {
+      const results = await musicApi.searchMusic(query.trim(), 20)
+      setSearchResults(results)
+    } catch (error) {
+      console.error('搜索失败:', error)
+      setSearchResults([])
+    } finally {
+      setIsSearching(false)
+    }
+  }, [])
+
+  // 防抖搜索
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current)
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      if (searchQuery && showSearch) {
+        handleSearch(searchQuery)
+      }
+    }, 500)
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current)
+      }
+    }
+  }, [searchQuery, showSearch, handleSearch])
+
+  const togglePlay = async () => {
+    if (!currentTrack) {
+      // 如果没有当前轨道，尝试播放第一首
+      if (playlist.length > 0) {
+        await loadAndPlayTrack(playlist[0])
+        setCurrentTrackIndex(0)
+      }
+      return
+    }
+
+    if (isPlaying) {
+      audioManager.stop()
+      setIsPlaying(false)
+    } else {
+      await loadAndPlayTrack(currentTrack)
+    }
   }
 
-  const handleNext = () => {
-    setCurrentTrack((prev) => (prev + 1) % tracks.length)
-    setCurrentTime(0)
-  }
+  const handleNext = useCallback(() => {
+    if (playlist.length === 0) return
 
-  const handlePrevious = () => {
-    setCurrentTrack((prev) => (prev - 1 + tracks.length) % tracks.length)
+    const nextIndex = (currentTrackIndex + 1) % playlist.length
+    setCurrentTrackIndex(nextIndex)
     setCurrentTime(0)
-  }
+    audioManager.stop()
+    setIsPlaying(false)
+  }, [currentTrackIndex, playlist.length])
+
+  const handlePrevious = useCallback(() => {
+    if (playlist.length === 0) return
+
+    const prevIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length
+    setCurrentTrackIndex(prevIndex)
+    setCurrentTime(0)
+    audioManager.stop()
+    setIsPlaying(false)
+  }, [currentTrackIndex, playlist.length])
 
   const handleVolumeChange = (newVolume: number) => {
     setVolume(newVolume)
@@ -94,13 +228,41 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
     setIsMuted(!isMuted)
   }
 
+  const addToPlaylistHandler = (track: SearchResult) => {
+    addToPlaylist({
+      id: track.id,
+      name: track.name,
+      artist: track.artist,
+      album: track.album,
+      duration: track.duration,
+      cover: track.cover,
+      platform: track.platform
+    })
+  }
+
+  const toggleFavorite = (track: SearchResult | CurrentTrack) => {
+    if (isFavorite(track.id)) {
+      removeFromFavorites(track.id)
+    } else {
+      addToFavorites({
+        id: track.id,
+        name: track.name,
+        artist: track.artist,
+        album: track.album,
+        duration: track.duration,
+        cover: track.cover,
+        platform: track.platform
+      })
+    }
+  }
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60)
     const secs = seconds % 60
     return `${mins}:${secs.toString().padStart(2, '0')}`
   }
 
-  const progressPercentage = (currentTime / tracks[currentTrack].duration) * 100
+  const progressPercentage = currentTrack && duration > 0 ? (currentTime / duration) * 100 : 0
 
   return (
     <div className={`fixed bottom-4 right-4 z-50 ${className}`}>
@@ -123,17 +285,109 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
               transition={{ type: 'spring', duration: 0.3 }}
               className="absolute bottom-16 right-0 w-80 glass-card rounded-lg p-4 border border-border/20 shadow-xl"
             >
+              {/* 顶部控制栏 */}
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSearch(!showSearch)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Search className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setShowSettings(true)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Settings className="w-4 h-4" />
+                  </Button>
+                </div>
+                <div className="text-xs text-text-muted">
+                  {settings.platform === 'netease' && '网易云音乐'}
+                  {settings.platform === 'qq' && 'QQ音乐'}
+                  {settings.platform === 'local' && '本地音乐'}
+                </div>
+              </div>
+
+              {/* 搜索面板 */}
+              {showSearch && (
+                <div className="mb-4 p-3 bg-bg-secondary rounded-lg">
+                  <div className="flex items-center gap-2 mb-3">
+                    <Search className="w-4 h-4 text-text-muted" />
+                    <Input
+                      placeholder="搜索音乐..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="flex-1 h-8"
+                    />
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowSearch(false)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="w-4 h-4" />
+                    </Button>
+                  </div>
+
+                  {isSearching && (
+                    <div className="text-center py-2 text-sm text-text-muted">搜索中...</div>
+                  )}
+
+                  {searchResults.length > 0 && (
+                    <div className="max-h-40 overflow-y-auto space-y-1">
+                      {searchResults.map((result) => (
+                        <div key={result.id} className="flex items-center gap-2 p-2 rounded hover:bg-bg-tertiary">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium text-sm truncate">{result.name}</div>
+                            <div className="text-xs text-text-muted truncate">{result.artist}</div>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleFavorite(result)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Heart className={`w-3 h-3 ${isFavorite(result.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => addToPlaylistHandler(result)}
+                              className="h-6 w-6 p-0"
+                            >
+                              <Plus className="w-3 h-3" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
               {/* 当前播放信息 */}
               <div className="text-center mb-4">
-                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center">
-                  <span className="text-2xl">🎵</span>
+                <div className="w-16 h-16 mx-auto mb-3 bg-gradient-to-br from-primary to-accent rounded-full flex items-center justify-center overflow-hidden">
+                  {currentTrack?.cover ? (
+                    <img src={currentTrack.cover} alt={currentTrack.name} className="w-full h-full object-cover" />
+                  ) : (
+                    <span className="text-2xl">🎵</span>
+                  )}
                 </div>
                 <div className="font-semibold text-text">
-                  {tracks[currentTrack].name}
+                  {currentTrack?.name || '暂无播放'}
                 </div>
                 <div className="text-sm text-text-muted">
-                  {tracks[currentTrack].artist}
+                  {currentTrack?.artist || '请添加音乐到播放列表'}
                 </div>
+                {error && (
+                  <div className="text-xs text-red-500 mt-1">{error}</div>
+                )}
               </div>
 
               {/* 进度条 */}
@@ -147,7 +401,7 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
                 </div>
                 <div className="flex justify-between text-xs text-text-muted mt-1">
                   <span>{formatTime(currentTime)}</span>
-                  <span>{formatTime(tracks[currentTrack].duration)}</span>
+                  <span>{formatTime(duration)}</span>
                 </div>
               </div>
 
@@ -157,29 +411,40 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handlePrevious}
-                  className="w-8 h-8 rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors flex items-center justify-center"
+                  disabled={playlist.length === 0}
+                  className="w-8 h-8 rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors flex items-center justify-center disabled:opacity-50"
                 >
-                  <span className="text-sm">⏮️</span>
+                  <SkipBack className="w-4 h-4" />
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={togglePlay}
-                  className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all flex items-center justify-center"
+                  disabled={isLoading || (playlist.length === 0 && !currentTrack)}
+                  className="w-12 h-12 rounded-full bg-gradient-to-r from-primary to-accent hover:shadow-lg transition-all flex items-center justify-center disabled:opacity-50"
                 >
-                  <span className="text-xl text-white">
-                    {isPlaying ? '⏸️' : '▶️'}
-                  </span>
+                  {isLoading ? (
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                    />
+                  ) : isPlaying ? (
+                    <Pause className="w-5 h-5 text-white" />
+                  ) : (
+                    <Play className="w-5 h-5 text-white" />
+                  )}
                 </motion.button>
 
                 <motion.button
                   whileHover={{ scale: 1.1 }}
                   whileTap={{ scale: 0.9 }}
                   onClick={handleNext}
-                  className="w-8 h-8 rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors flex items-center justify-center"
+                  disabled={playlist.length === 0}
+                  className="w-8 h-8 rounded-full bg-bg-secondary hover:bg-bg-tertiary transition-colors flex items-center justify-center disabled:opacity-50"
                 >
-                  <span className="text-sm">⏭️</span>
+                  <SkipForward className="w-4 h-4" />
                 </motion.button>
               </div>
 
@@ -191,9 +456,13 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
                   onClick={toggleMute}
                   className="text-text-secondary hover:text-text transition-colors"
                 >
-                  <span className="text-sm">
-                    {isMuted ? '🔇' : volume > 0.5 ? '🔊' : '🔉'}
-                  </span>
+                  {isMuted ? (
+                    <VolumeX className="w-4 h-4" />
+                  ) : volume > 0.5 ? (
+                    <Volume2 className="w-4 h-4" />
+                  ) : (
+                    <Volume2 className="w-4 h-4" />
+                  )}
                 </motion.button>
 
                 <div className="flex-1">
@@ -218,28 +487,61 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
 
               {/* 播放列表 */}
               <div className="mt-4 pt-4 border-t border-border/20">
-                <div className="text-sm font-medium text-text mb-2">播放列表</div>
-                <div className="space-y-1">
-                  {tracks.map((track, index) => (
-                    <motion.button
-                      key={index}
-                      whileHover={{ scale: 1.02 }}
-                      whileTap={{ scale: 0.98 }}
-                      onClick={() => {
-                        setCurrentTrack(index)
-                        setCurrentTime(0)
-                      }}
-                      className={`w-full text-left p-2 rounded transition-colors ${
-                        index === currentTrack
-                          ? 'bg-primary/20 text-primary'
-                          : 'hover:bg-bg-secondary'
-                      }`}
+                <div className="text-sm font-medium text-text mb-2 flex items-center justify-between">
+                  <span>播放列表 ({playlist.length})</span>
+                  {currentTrack && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => toggleFavorite(currentTrack)}
+                      className="h-6 w-6 p-0"
                     >
-                      <div className="font-medium text-sm">{track.name}</div>
-                      <div className="text-xs text-text-muted">{track.artist}</div>
-                    </motion.button>
-                  ))}
+                      <Heart className={`w-3 h-3 ${isFavorite(currentTrack.id) ? 'fill-red-500 text-red-500' : ''}`} />
+                    </Button>
+                  )}
                 </div>
+                {playlist.length === 0 ? (
+                  <div className="text-center py-4 text-sm text-text-muted">
+                    播放列表为空<br />
+                    使用搜索功能添加音乐
+                  </div>
+                ) : (
+                  <div className="space-y-1 max-h-32 overflow-y-auto">
+                    {playlist.map((track, index) => (
+                      <motion.div
+                        key={track.id}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                        className={`flex items-center gap-2 p-2 rounded transition-colors ${
+                          index === currentTrackIndex
+                            ? 'bg-primary/20 text-primary'
+                            : 'hover:bg-bg-secondary'
+                        }`}
+                      >
+                        <button
+                          onClick={() => {
+                            setCurrentTrackIndex(index)
+                            setCurrentTime(0)
+                            audioManager.stop()
+                            setIsPlaying(false)
+                          }}
+                          className="flex-1 text-left min-w-0"
+                        >
+                          <div className="font-medium text-sm truncate">{track.name}</div>
+                          <div className="text-xs text-text-muted truncate">{track.artist}</div>
+                        </button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeFromPlaylist(track.id)}
+                          className="h-6 w-6 p-0 opacity-60 hover:opacity-100"
+                        >
+                          <X className="w-3 h-3" />
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                )}
               </div>
             </motion.div>
           )}
@@ -289,6 +591,12 @@ export function MusicPlayer({ className = '' }: MusicPlayerProps) {
           )}
         </motion.button>
       </motion.div>
+
+      {/* 音乐设置对话框 */}
+      <MusicSettings
+        open={showSettings}
+        onOpenChange={setShowSettings}
+      />
     </div>
   )
 }

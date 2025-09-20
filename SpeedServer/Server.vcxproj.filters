@@ -1,0 +1,170 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="源文件">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="头文件">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;h++;hm;inl;inc;ipp;xsd</Extensions>
+    </Filter>
+    <Filter Include="oicq">
+      <UniqueIdentifier>{12950513-7818-41e0-be2f-7d0c28d4bf48}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Protocol">
+      <UniqueIdentifier>{0e6b28ab-36ff-476c-8fcf-ca8566744521}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="ConmData">
+      <UniqueIdentifier>{d077a189-04ba-4324-b3cb-c78024aaa254}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="FileMD5">
+      <UniqueIdentifier>{2217c57c-fab4-4cf8-be7c-29f60b69bf63}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="Server.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="oicq\tea.c">
+      <Filter>oicq</Filter>
+    </ClCompile>
+    <ClCompile Include="ShadowChallenge.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Task.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="DirectoryServer.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="GameServer.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Message.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Room.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Map.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="UserServer.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Database.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Player.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Outdoor.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="ShopServer.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="Dance.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="QQServer.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Utils.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ConnectionPool.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="pet.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="DBConnection.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="HTTPRequest.h">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+    <ClCompile Include="fMD5.cpp">
+      <Filter>FileMD5</Filter>
+    </ClCompile>
+    <ClCompile Include="md5file.cpp">
+      <Filter>FileMD5</Filter>
+    </ClCompile>
+    <ClCompile Include="MessageQuickRPC.cpp">
+      <Filter>Protocol</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="oicq\tea.h">
+      <Filter>oicq</Filter>
+    </ClInclude>
+    <ClInclude Include="Message.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Map.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Database.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Room.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Outdoor.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Dance.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="Utils.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="GameServer.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="ConmData.h">
+      <Filter>ConmData</Filter>
+    </ClInclude>
+    <ClInclude Include="z_debug.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ConnectionPool.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ini.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="pet.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="LegendShape.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="MD5.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadConfig.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="NetSpeed.h">
+      <Filter>Protocol</Filter>
+    </ClInclude>
+    <ClInclude Include="fMD5.h">
+      <Filter>FileMD5</Filter>
+    </ClInclude>
+    <ClInclude Include="md5global.h">
+      <Filter>FileMD5</Filter>
+    </ClInclude>
+    <ClInclude Include="md5file.h">
+      <Filter>FileMD5</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

@@ -1,0 +1,15 @@
+void LoadMechTreasureInfoConfig();
+void LoadAppellationConfig();
+void LoadRandomMapPool();//ÀÊª˙µÿÕº≥ÿ≈‰÷√
+void LoadMapPool();
+void LoadPetItem();
+void LoadCarTreasure();
+int LoadTreasureBox();
+void LoadMagicLampCfg();
+void LoadAuctionCfg();
+void LoadRegisterBox();
+void LoadDayRaffleBox();
+void LoadMagicFormationBoxs();
+void LoadMagicExchangeShopBoxs();
+void LoadMiracleCfg();
+void LoadUserPermissionsConfig();
