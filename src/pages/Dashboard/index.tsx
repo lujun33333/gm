@@ -7,8 +7,9 @@ import { GradientText } from '../../components/fx/GradientText'
 import { ShimmerPrimaryButton, ShimmerSecondaryButton, ShimmerSuccessButton } from '../../components/fx/ShimmerButton'
 import { Permit } from '../../components/common/Permit'
 import { useConfirmDialog } from '../../components/common/ConfirmDialog'
-import { Statistic } from '../../components/data/Statistic'
-import { Gauge } from '../../components/data/Gauge'
+import { Statistic, StatisticCard } from '../../components/data/Statistic'
+import { Gauge, MiniGauge } from '../../components/data/Gauge'
+import { TrendChart, MultiTrendChart, MiniTrendChart } from '../../components/charts/TrendChart'
 import { useToast } from '../../hooks/useToast'
 import { api } from '../../utils/api'
 import type { DashboardData } from '../../utils/mock'
@@ -22,6 +23,51 @@ export function Dashboard() {
   useEffect(() => {
     loadDashboardData()
   }, [])
+
+  // 生成模拟趋势数据
+  const generateTrendData = (hours: number, baseValue: number, variance: number) => {
+    const data = []
+    const now = new Date()
+
+    for (let i = hours; i >= 0; i--) {
+      const time = new Date(now.getTime() - i * 60 * 60 * 1000)
+      const randomVariance = (Math.random() - 0.5) * variance
+      const value = Math.max(0, baseValue + randomVariance)
+
+      data.push({
+        time: time.getHours().toString().padStart(2, '0') + ':00',
+        value: Math.round(value)
+      })
+    }
+
+    return data
+  }
+
+  // 生成服务器资源趋势数据
+  const getServerTrendData = () => {
+    if (!dashboardData) return []
+
+    return [
+      {
+        time: '12小时前',
+        cpu: dashboardData.cpu * 0.8,
+        memory: dashboardData.mem * 0.9,
+        network: 45
+      },
+      {
+        time: '6小时前',
+        cpu: dashboardData.cpu * 0.9,
+        memory: dashboardData.mem * 0.95,
+        network: 60
+      },
+      {
+        time: '现在',
+        cpu: dashboardData.cpu,
+        memory: dashboardData.mem,
+        network: 78
+      }
+    ]
+  }
 
   const loadDashboardData = async () => {
     try {
@@ -114,259 +160,379 @@ export function Dashboard() {
   }
 
   return (
-    <PageContainer maxWidth="screen-xl" className="px-6 py-8">
+    <PageContainer maxWidth="screen-2xl" className="px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
       {/* 页面标题区域 */}
-      <div className="mb-8">
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.4 }}
+        className="mb-8"
+      >
         <div className="text-center lg:text-left">
-          <GradientText className="text-4xl lg:text-5xl font-bold mb-3">
+          <GradientText className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
             仪表盘概览
           </GradientText>
-          <p className="text-text-muted text-lg">实时监控系统运行状态与玩家数据统计</p>
+          <p className="text-text-muted text-base lg:text-lg">
+            实时监控系统运行状态与玩家数据统计
+          </p>
         </div>
-      </div>
+      </motion.div>
 
-      <Grid cols={12} gap={4} className="lg:gap-6">
-        {/* 核心指标行 - 3个关键统计卡片 */}
-        <GridItem span={{ base: 12, md: 4 }}>
+      <div className="space-y-6 lg:space-y-8">
+        {/* 第一行：关键指标卡片 - 4列响应式布局 */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 lg:gap-6">
+          {/* 在线玩家 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.1 }}
+            transition={{ duration: 0.4, delay: 0.1 }}
           >
-            <GlowCard glowColor="primary" className="h-full p-6">
+            <StatisticCard
+              icon="👥"
+              label="在线玩家"
+              value={dashboardData.online_total}
+              suffix="人"
+              trend={{
+                value: 8.5,
+                isPositive: true
+              }}
+              description="24小时内平均在线人数增长"
+              color="primary"
+              size="lg"
+              className="h-full"
+            />
+          </motion.div>
+
+          {/* CPU使用率 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.2 }}
+          >
+            <GlowCard
+              glowColor={dashboardData.cpu > 80 ? "error" : dashboardData.cpu > 60 ? "warning" : "success"}
+              className="h-full p-4 lg:p-6"
+            >
               <div className="flex items-center justify-between mb-4">
-                <GradientText className="text-lg font-semibold" gradient={1}>
-                  在线玩家
-                </GradientText>
-                <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
-              </div>
-              <Statistic
-                label="当前在线人数"
-                value={dashboardData.online_total}
-                className="mb-4"
-              />
-              <div className="space-y-2">
-                <div className="flex justify-between text-xs text-text-muted">
-                  <span>活跃度</span>
-                  <span>{Math.round((dashboardData.online_total / 2500) * 100)}%</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">🖥️</span>
+                  <span className="font-semibold text-text">CPU</span>
                 </div>
-                <div className="h-2 bg-bg-secondary rounded-full overflow-hidden">
-                  <motion.div
-                    initial={{ width: 0 }}
-                    animate={{ width: `${Math.round((dashboardData.online_total / 2500) * 100)}%` }}
-                    transition={{ duration: 1, delay: 0.5 }}
-                    className="h-full bg-gradient-1 rounded-full"
+                <MiniGauge
+                  value={dashboardData.cpu}
+                  color={dashboardData.cpu > 80 ? "rgb(var(--error))" : dashboardData.cpu > 60 ? "rgb(var(--warning))" : "rgb(var(--success))"}
+                />
+              </div>
+              <div className="text-center">
+                <div className="text-2xl lg:text-3xl font-bold text-text mb-1">
+                  {dashboardData.cpu}%
+                </div>
+                <div className="text-sm text-text-muted">当前使用率</div>
+                <div className="mt-3">
+                  <MiniTrendChart
+                    data={generateTrendData(6, dashboardData.cpu, 10)}
+                    color={dashboardData.cpu > 80 ? "rgb(var(--error))" : dashboardData.cpu > 60 ? "rgb(var(--warning))" : "rgb(var(--success))"}
+                    height={40}
                   />
                 </div>
               </div>
             </GlowCard>
           </motion.div>
-        </GridItem>
 
-        <GridItem span={{ base: 12, md: 4 }}>
+          {/* 内存使用率 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.2 }}
+            transition={{ duration: 0.4, delay: 0.3 }}
           >
-            <GlowCard glowColor="accent" className="h-full p-6">
+            <GlowCard
+              glowColor={dashboardData.mem > 80 ? "error" : dashboardData.mem > 60 ? "warning" : "success"}
+              className="h-full p-4 lg:p-6"
+            >
               <div className="flex items-center justify-between mb-4">
-                <GradientText className="text-lg font-semibold" gradient={2}>
-                  系统资源
-                </GradientText>
-                <div className="text-xs px-2 py-1 bg-success/20 text-success rounded-full">
-                  健康
+                <div className="flex items-center gap-2">
+                  <span className="text-2xl">💾</span>
+                  <span className="font-semibold text-text">内存</span>
                 </div>
+                <MiniGauge
+                  value={dashboardData.mem}
+                  color={dashboardData.mem > 80 ? "rgb(var(--error))" : dashboardData.mem > 60 ? "rgb(var(--warning))" : "rgb(var(--success))"}
+                />
               </div>
-              <div className="space-y-4">
-                <Gauge label="CPU 使用率" value={dashboardData.cpu} />
-                <Gauge label="内存使用率" value={dashboardData.mem} />
-              </div>
-            </GlowCard>
-          </motion.div>
-        </GridItem>
-
-        <GridItem span={{ base: 12, md: 4 }}>
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.3 }}
-          >
-            <GlowCard glowColor="success" className="h-full p-6">
-              <div className="flex items-center justify-between mb-4">
-                <GradientText className="text-lg font-semibold" gradient={3}>
-                  服务状态
-                </GradientText>
-                <div className="text-xs px-2 py-1 bg-success/20 text-success rounded-full">
-                  运行中
+              <div className="text-center">
+                <div className="text-2xl lg:text-3xl font-bold text-text mb-1">
+                  {dashboardData.mem}%
                 </div>
-              </div>
-              <div className="space-y-4">
-                <div className="text-center border-b border-border/50 pb-3">
-                  <div className="text-2xl font-bold text-primary mb-1">{dashboardData.uptime}</div>
-                  <div className="text-sm text-text-muted">稳定运行时间</div>
-                </div>
-                <div className="space-y-3">
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-text-secondary flex items-center">
-                      <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-                      网络状态
-                    </span>
-                    <span className="text-sm font-semibold text-success">正常</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm text-text-secondary flex items-center">
-                      <div className="w-2 h-2 bg-success rounded-full mr-2"></div>
-                      数据库
-                    </span>
-                    <span className="text-sm font-semibold text-success">已连接</span>
-                  </div>
+                <div className="text-sm text-text-muted">当前使用率</div>
+                <div className="mt-3">
+                  <MiniTrendChart
+                    data={generateTrendData(6, dashboardData.mem, 8)}
+                    color={dashboardData.mem > 80 ? "rgb(var(--error))" : dashboardData.mem > 60 ? "rgb(var(--warning))" : "rgb(var(--success))"}
+                    height={40}
+                  />
                 </div>
               </div>
             </GlowCard>
           </motion.div>
-        </GridItem>
 
-        {/* 网络流量统计 */}
-        <GridItem span={{ base: 12, lg: 8 }}>
+          {/* 网络状态 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.4 }}
+            transition={{ duration: 0.4, delay: 0.4 }}
+          >
+            <StatisticCard
+              icon="🌐"
+              label="网络流量"
+              value={`${((dashboardData.net_total_in + dashboardData.net_total_out) / 1024 / 1024).toFixed(1)}`}
+              suffix="MB"
+              trend={{
+                value: 12.3,
+                isPositive: true
+              }}
+              description="今日总流量使用量"
+              color="success"
+              size="lg"
+              className="h-full"
+            />
+          </motion.div>
+        </div>
+
+        {/* 第二行：图表区域 */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* 服务器资源趋势 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.5 }}
+            className="lg:col-span-2"
           >
             <GlowCard className="h-full p-6">
               <div className="flex items-center justify-between mb-6">
-                <GradientText className="text-2xl font-bold">
-                  网络流量统计
+                <GradientText className="text-xl font-bold">
+                  🔍 系统资源监控
                 </GradientText>
                 <div className="text-sm text-text-muted">
-                  {new Date().toLocaleDateString('zh-CN', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
+                  实时状态
                 </div>
               </div>
 
-              <Grid cols={2} gap={4} className="md:grid-cols-3">
-                <GridItem span={1}>
-                  <Statistic
-                    label="总入站流量"
-                    value={`${(dashboardData.net_total_in / 1024 / 1024).toFixed(1)} MB`}
-                    className="text-center p-4 bg-primary/5 rounded-lg border border-primary/20"
-                  />
-                </GridItem>
-                <GridItem span={1}>
-                  <Statistic
-                    label="总出站流量"
-                    value={`${(dashboardData.net_total_out / 1024 / 1024).toFixed(1)} MB`}
-                    className="text-center p-4 bg-accent/5 rounded-lg border border-accent/20"
-                  />
-                </GridItem>
-                <GridItem span={1}>
-                  <Statistic
-                    label="总流量"
-                    value={`${((dashboardData.net_total_in + dashboardData.net_total_out) / 1024 / 1024).toFixed(1)} MB`}
-                    className="text-center p-4 bg-success/5 rounded-lg border border-success/20"
-                  />
-                </GridItem>
-              </Grid>
+              <MultiTrendChart
+                data={getServerTrendData()}
+                metrics={[
+                  {
+                    key: 'cpu',
+                    name: 'CPU',
+                    color: 'rgb(var(--primary))',
+                    formatter: (value) => `${value.toFixed(1)}%`
+                  },
+                  {
+                    key: 'memory',
+                    name: '内存',
+                    color: 'rgb(var(--accent))',
+                    formatter: (value) => `${value.toFixed(1)}%`
+                  },
+                  {
+                    key: 'network',
+                    name: '网络',
+                    color: 'rgb(var(--success))',
+                    formatter: (value) => `${value.toFixed(1)}MB/s`
+                  }
+                ]}
+                height={300}
+              />
             </GlowCard>
           </motion.div>
-        </GridItem>
 
-        {/* 服务器控制区域 */}
-        <GridItem span={{ base: 12, lg: 4 }}>
+          {/* 服务器状态和控制 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.5 }}
+            transition={{ duration: 0.4, delay: 0.6 }}
           >
             <GlowCard className="h-full p-6">
               <div className="mb-6">
-                <GradientText className="text-2xl font-bold mb-2">
-                  服务器控制
+                <GradientText className="text-xl font-bold mb-2">
+                  🎛️ 服务器控制
                 </GradientText>
-                <p className="text-sm text-text-muted">危险操作需要确认</p>
+                <div className="flex items-center gap-2 mb-4">
+                  <div className="w-3 h-3 bg-success rounded-full animate-pulse"></div>
+                  <span className="text-sm text-text-muted">运行状态正常</span>
+                </div>
               </div>
 
-              <div className="space-y-4">
+              {/* 服务器信息 */}
+              <div className="space-y-4 mb-6">
+                <div className="text-center p-4 bg-bg-secondary/50 rounded-lg">
+                  <div className="text-2xl font-bold text-primary mb-1">
+                    {dashboardData.uptime}
+                  </div>
+                  <div className="text-sm text-text-muted">运行时间</div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div className="flex items-center justify-between p-2 bg-success/5 rounded">
+                    <span className="text-text-secondary">数据库</span>
+                    <span className="text-success font-medium">已连接</span>
+                  </div>
+                  <div className="flex items-center justify-between p-2 bg-success/5 rounded">
+                    <span className="text-text-secondary">API</span>
+                    <span className="text-success font-medium">正常</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* 控制按钮 */}
+              <div className="space-y-3">
                 <Permit perm="SERVER_CONTROL">
                   <button
                     onClick={handleDangerousAction}
-                    className="w-full h-12 text-base bg-gradient-to-r from-error to-warning text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
+                    className="w-full h-10 text-sm bg-gradient-to-r from-error to-warning text-white rounded-lg hover:shadow-lg transition-all duration-300 font-medium"
                   >
-                    <span className="mr-2">🔄</span>
-                    重启服务器 (演示)
+                    🔄 重启服务器
                   </button>
                 </Permit>
 
                 <Permit perm="MONITOR_VIEW">
-                  <ShimmerSecondaryButton className="w-full h-12 text-base">
-                    <span className="mr-2">📊</span>
-                    查看详细监控
+                  <ShimmerSecondaryButton className="w-full h-10 text-sm">
+                    📊 详细监控
                   </ShimmerSecondaryButton>
                 </Permit>
 
                 <Permit perm="SERVER_CONTROL">
-                  <ShimmerSuccessButton className="w-full h-12 text-base">
-                    <span className="mr-2">💾</span>
-                    备份系统数据
+                  <ShimmerSuccessButton className="w-full h-10 text-sm">
+                    💾 备份数据
                   </ShimmerSuccessButton>
                 </Permit>
-
-                <div className="pt-4 border-t border-border/50">
-                  <div className="text-xs text-text-muted text-center">
-                    危险操作需要输入"CONFIRM"确认
-                  </div>
-                </div>
               </div>
             </GlowCard>
           </motion.div>
-        </GridItem>
+        </div>
 
-        {/* 玩家带宽排行 */}
-        <GridItem span={{ base: 12 }}>
+        {/* 第三行：玩家统计和活动 */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* 在线玩家趋势 */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.18, delay: 0.6 }}
+            transition={{ duration: 0.4, delay: 0.7 }}
           >
-            <GlowCard className="p-6">
-              <GradientText className="text-xl font-bold mb-4">
-                玩家带宽使用排行 TOP 5
+            <GlowCard className="h-full p-6">
+              <div className="mb-6">
+                <GradientText className="text-xl font-bold mb-2">
+                  📈 在线玩家趋势
+                </GradientText>
+                <p className="text-sm text-text-muted">24小时内玩家活跃度变化</p>
+              </div>
+
+              <TrendChart
+                data={generateTrendData(12, dashboardData.online_total, 300)}
+                color="rgb(var(--primary))"
+                height={240}
+                valueFormatter={(value) => `${value}人`}
+                timeFormatter={(time) => time}
+              />
+            </GlowCard>
+          </motion.div>
+
+          {/* 玩家带宽排行 */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 0.8 }}
+          >
+            <GlowCard className="h-full p-6">
+              <GradientText className="text-xl font-bold mb-6">
+                🏆 带宽使用排行 TOP 5
               </GradientText>
 
               <div className="space-y-3">
                 {dashboardData.player_top_bandwidth.map((player, index) => (
-                  <div key={player.uin} className="flex items-center justify-between p-3 bg-bg-secondary rounded-lg">
+                  <motion.div
+                    key={player.uin}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.3, delay: 0.1 * index }}
+                    className="flex items-center justify-between p-3 bg-bg-secondary/50 rounded-lg hover:bg-bg-secondary transition-colors"
+                  >
                     <div className="flex items-center space-x-3">
                       <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
-                        index === 0 ? 'bg-warning text-white' :
-                        index === 1 ? 'bg-accent text-white' :
-                        index === 2 ? 'bg-success text-white' :
-                        'bg-bg-tertiary text-text-secondary'
+                        index === 0 ? 'bg-gradient-to-r from-yellow-400 to-yellow-600 text-white' :
+                        index === 1 ? 'bg-gradient-to-r from-gray-300 to-gray-500 text-white' :
+                        index === 2 ? 'bg-gradient-to-r from-amber-600 to-amber-800 text-white' :
+                        'bg-bg-tertiary text-text-secondary border border-border'
                       }`}>
                         {index + 1}
                       </div>
                       <div>
                         <div className="font-medium text-text">{player.nickname}</div>
-                        <div className="text-sm text-text-muted">UIN: {player.uin}</div>
+                        <div className="text-xs text-text-muted">UIN: {player.uin}</div>
                       </div>
                     </div>
                     <div className="text-right">
-                      <div className="font-semibold text-primary">
+                      <div className="font-bold text-primary">
                         {(player.bps / 1024).toFixed(1)} KB/s
                       </div>
                       <div className="text-xs text-text-muted">带宽使用</div>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
               </div>
             </GlowCard>
           </motion.div>
-        </GridItem>
-      </Grid>
+        </div>
+
+        {/* 第四行：网络流量详细统计 */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 0.9 }}
+        >
+          <GlowCard className="p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
+              <div>
+                <GradientText className="text-xl font-bold mb-2">
+                  📊 网络流量统计
+                </GradientText>
+                <p className="text-sm text-text-muted">实时网络流量监控和统计</p>
+              </div>
+              <div className="text-sm text-text-muted mt-4 sm:mt-0">
+                {new Date().toLocaleDateString('zh-CN', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 lg:gap-6">
+              <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20">
+                <div className="text-xs text-primary font-medium mb-2">入站流量</div>
+                <div className="text-2xl lg:text-3xl font-bold text-primary">
+                  {(dashboardData.net_total_in / 1024 / 1024).toFixed(1)}
+                </div>
+                <div className="text-xs text-text-muted mt-1">MB</div>
+              </div>
+
+              <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-accent/5 to-accent/10 rounded-lg border border-accent/20">
+                <div className="text-xs text-accent font-medium mb-2">出站流量</div>
+                <div className="text-2xl lg:text-3xl font-bold text-accent">
+                  {(dashboardData.net_total_out / 1024 / 1024).toFixed(1)}
+                </div>
+                <div className="text-xs text-text-muted mt-1">MB</div>
+              </div>
+
+              <div className="text-center p-4 lg:p-6 bg-gradient-to-br from-success/5 to-success/10 rounded-lg border border-success/20">
+                <div className="text-xs text-success font-medium mb-2">总流量</div>
+                <div className="text-2xl lg:text-3xl font-bold text-success">
+                  {((dashboardData.net_total_in + dashboardData.net_total_out) / 1024 / 1024).toFixed(1)}
+                </div>
+                <div className="text-xs text-text-muted mt-1">MB</div>
+              </div>
+            </div>
+          </GlowCard>
+        </motion.div>
+      </div>
 
       {/* ConfirmDialog 组件 */}
       <ConfirmDialog />
